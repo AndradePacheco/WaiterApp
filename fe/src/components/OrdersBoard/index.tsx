@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Order } from "../../types/Order";
 import { Board, OrdersContainer } from "./style"
+import { OrderModal } from "../OrderModal";
 
 interface OrdersBoardProps {
     icon: string;
@@ -7,25 +9,47 @@ interface OrdersBoardProps {
     orders: Order[];
 }
 
-export function OrdersBoard({icon, title}: OrdersBoardProps) {
-    return(
-        <Board>
-                <header>
-                    <span>{icon}</span>
-                    <strong>{title}</strong>
-                    <span>(1)</span>
-                </header>
+export function OrdersBoard({ icon, title, orders }: OrdersBoardProps) {
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState<null | Order>(null);
 
-                <OrdersContainer>
-                    <button type="button">
-                        <strong>Mesa 1</strong>
-                        <span>2 itens</span>
-                    </button>
-                    <button type="button">
-                        <strong>Mesa 2</strong>
-                        <span>2 itens</span>
-                    </button>
+    function handleOpenModal(order: Order) {
+        setIsModalVisible(true);
+        setSelectedOrder(order);
+    }
+
+    function handleCloseModal() {
+        setIsModalVisible(false);
+        setSelectedOrder(null);
+    }
+
+    return (
+        <Board>
+            <OrderModal
+            visible={isModalVisible}
+            order={selectedOrder}
+            onClose={handleCloseModal}
+            />
+
+            <header>
+                <span>{icon}</span>
+                <strong>{title}</strong>
+                <span>({orders.length})</span>
+            </header>
+
+            {
+                orders.length > 0 && <OrdersContainer>
+                    {
+                        orders.map((order) => (
+                            <button type="button" key={order._id} onClick={() => handleOpenModal(order)}>
+                                <strong>Mesa {order.table}</strong>
+                                <span>{order.products.length} itens</span>
+                            </button>
+                        ))
+                    }
+
                 </OrdersContainer>
-            </Board>
+            }
+        </Board>
     )
 }
